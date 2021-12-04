@@ -42,6 +42,18 @@ namespace AssetBundleLoader
 
             foreach (var transform in PrefabObject.GetComponentsInChildren<Transform>())
             {
+                if (transform.TryGetComponent<Light>(out Light light))
+                {
+                    PrefabObjects.Add(CreateLight(transform,
+                        transform.position,
+                        transform.eulerAngles,
+                        transform.localScale,
+                        light.color,
+                        light.intensity,
+                        light.range,
+                        light.shadows != LightShadows.None).gameObject);
+                }
+
                 if (!transform.TryGetComponent<MeshFilter>(out MeshFilter filter))
                     continue;
 
@@ -101,12 +113,48 @@ namespace AssetBundleLoader
             }
         }
 
+        private static LightSourceToy primitiveBaseLight = null;
+
+        public static LightSourceToy PrimitiveBaseLight
+        {
+            get
+            {
+                if (primitiveBaseLight == null)
+                {
+                    foreach (var gameObject in NetworkClient.prefabs.Values)
+                    {
+                        if (gameObject.TryGetComponent<LightSourceToy>(out var component))
+                            primitiveBaseLight = component;
+                    }
+                }
+
+                return primitiveBaseLight;
+            }
+        }
+
         public static PrimitiveObjectToy CreatePrimitive(Transform parent, PrimitiveType type, Vector3 pos, Vector3 rot, Vector3 size, Color color)
         {
             AdminToyBase toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent);
             PrimitiveObjectToy ptoy = toy.GetComponent<PrimitiveObjectToy>();
             ptoy.NetworkPrimitiveType = type;
             ptoy.NetworkMaterialColor = color;
+            ptoy.transform.position = pos;
+            ptoy.transform.rotation = Quaternion.Euler(rot);
+            ptoy.transform.localScale = size;
+            ptoy.NetworkScale = ptoy.transform.localScale;
+            NetworkServer.Spawn(toy.gameObject);
+            return ptoy;
+        }
+
+
+        public static LightSourceToy CreateLight(Transform parent, Vector3 pos, Vector3 rot, Vector3 size, Color color, float intensity, float range, bool shadows)
+        {
+            AdminToyBase toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent);
+            LightSourceToy ptoy = toy.GetComponent<LightSourceToy>();
+            ptoy.NetworkLightColor = color;
+            ptoy.NetworkLightIntensity = intensity;
+            ptoy.NetworkLightRange = range;
+            ptoy.NetworkLightShadows = shadows;
             ptoy.transform.position = pos;
             ptoy.transform.rotation = Quaternion.Euler(rot);
             ptoy.transform.localScale = size;
