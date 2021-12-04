@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
+using Exiled.Permissions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,13 +21,19 @@ namespace AssetBundleLoader.Commands
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
+            var player = Player.Get(sender);
+
+            if (!player.CheckPermission("loadbundles"))
+            {
+                response = "Missing permission";
+                return false;
+            }
+
             if (arguments.Count < 2)
             {
                 response = "Syntax: loadprefab <uniqueBundleName> <prefabName> <uniquePrefabName>";
                 return false;
             }
-
-            var player = Player.Get(sender);
 
             var bundleName = arguments.At(0);
             var prefabName = arguments.At(1);

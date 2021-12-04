@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
+using Exiled.Permissions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,6 +22,14 @@ namespace AssetBundleLoader.Commands
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
+            var player = Player.Get(sender);
+
+            if (!player.CheckPermission("loadbundles"))
+            {
+                response = "Missing permission";
+                return false;
+            }
+
             if (arguments.Count < 2)
             {
                 response = "Syntax: loadbundle <bundleName> <uniqueName>";
