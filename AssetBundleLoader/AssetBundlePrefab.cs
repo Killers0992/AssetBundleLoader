@@ -67,6 +67,9 @@ namespace AssetBundleLoader
                     case "Plane Instance":
                         type = PrimitiveType.Plane;
                         break;
+                    case "Cylinder Instance":
+                        type = PrimitiveType.Cylinder;
+                        break;
                     case "Cube Instance":
                         type = PrimitiveType.Cube;
                         break;
