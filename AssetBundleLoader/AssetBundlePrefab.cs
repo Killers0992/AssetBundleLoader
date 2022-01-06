@@ -63,25 +63,7 @@ namespace AssetBundleLoader
 
                     var shootingTarget = target.GetComponent<AdminToys.ShootingTarget>();
                     target.transform.localScale = transform.localScale;
-
-                    var cs = new ConstraintSource()
-                    {
-                        sourceTransform = transform,
-                        weight = 1f,
-                    };
-
-                    var pc = target.gameObject.AddComponent<PositionConstraint>();
-                    pc.constraintActive = true;
-                    pc.AddSource(cs);
-
-                    var rc = target.gameObject.AddComponent<RotationConstraint>();
-                    rc.constraintActive = true;
-                    rc.AddSource(cs);
-
-                    var sc = target.gameObject.AddComponent<ScaleConstraint>();
-                    sc.constraintActive = true;
-                    sc.AddSource(cs);
-
+                                                  
                     shootingTarget.NetworkScale = target.transform.localScale;
                     shootingTarget.NetworkPosition = target.transform.position;
                     shootingTarget.NetworkRotation = new LowPrecisionQuaternion(target.transform.rotation);
@@ -97,24 +79,6 @@ namespace AssetBundleLoader
                     var door2 = UnityEngine.Object.Instantiate(door.DoorType == Components.Enums.DoorType.HCZ ? AssetBundleManager.HCZDoor
                          : door.DoorType == Components.Enums.DoorType.LCZ ? AssetBundleManager.LCZDoor : AssetBundleManager.EZDoor, transform.position, transform.rotation);
                     door2.transform.localScale = transform.localScale;
-
-                    var cs = new ConstraintSource()
-                    {
-                        sourceTransform = transform,
-                        weight = 1f,
-                    };
-
-                    var pc = door2.gameObject.AddComponent<PositionConstraint>();
-                    pc.constraintActive = true;
-                    pc.AddSource(cs);
-
-                    var rc = door2.gameObject.AddComponent<RotationConstraint>();
-                    rc.constraintActive = true;
-                    rc.AddSource(cs);
-
-                    var sc = door2.gameObject.AddComponent<ScaleConstraint>();
-                    sc.constraintActive = true;
-                    sc.AddSource(cs);
 
                     if (door2.TryGetComponent<BreakableDoor>(out BreakableDoor breakableDoor))
                     {
@@ -212,26 +176,9 @@ namespace AssetBundleLoader
 
         public static PrimitiveObjectToy CreatePrimitive(Transform parent, PrimitiveType type, Color color)
         {
-            PrimitiveObjectToy toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent.transform.position, parent.transform.rotation);
+            PrimitiveObjectToy toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent.transform.position, parent.transform.rotation, parent);
             toy.transform.localScale = parent.localScale;
 
-            var cs = new ConstraintSource()
-            {
-                sourceTransform = parent,
-                weight = 1f,
-            };
-
-            var pc = toy.gameObject.AddComponent<PositionConstraint>();
-            pc.constraintActive = true;
-            pc.AddSource(cs);
-
-            var rc = toy.gameObject.AddComponent<RotationConstraint>();
-            rc.constraintActive = true;
-            rc.AddSource(cs);
-
-            var sc = toy.gameObject.AddComponent<ScaleConstraint>();
-            sc.constraintActive = true;
-            sc.AddSource(cs);
 
             toy.NetworkScale = toy.transform.localScale;
             toy.NetworkPosition = toy.transform.position;
@@ -249,26 +196,8 @@ namespace AssetBundleLoader
 
         public static LightSourceToy CreateLight(Transform parent, Color color, float intensity, float range, bool shadows)
         {
-            LightSourceToy toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent.transform.position, parent.transform.rotation);
+            LightSourceToy toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent.transform.position, parent.transform.rotation, parent);
             toy.transform.localScale = parent.localScale;
-
-            var cs = new ConstraintSource()
-            {
-                sourceTransform = parent,
-                weight = 1f,
-            };
-
-            var pc = toy.gameObject.AddComponent<PositionConstraint>();
-            pc.constraintActive = true;
-            pc.AddSource(cs);
-
-            var rc = toy.gameObject.AddComponent<RotationConstraint>();
-            rc.constraintActive = true;
-            rc.AddSource(cs);
-
-            var sc = toy.gameObject.AddComponent<ScaleConstraint>();
-            sc.constraintActive = true;
-            sc.AddSource(cs);
 
             toy.NetworkScale = toy.transform.localScale;
             toy.NetworkPosition = toy.transform.position;
