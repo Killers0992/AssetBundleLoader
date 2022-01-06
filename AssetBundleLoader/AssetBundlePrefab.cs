@@ -1,5 +1,7 @@
 ﻿using AdminToys;
+using AssetBundleLoader.Components;
 using Exiled.API.Features;
+using Interactables.Interobjects;
 using Mirror;
 using System;
 using System.Collections.Generic;
@@ -7,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Animations;
 
 namespace AssetBundleLoader
 {
@@ -45,13 +48,88 @@ namespace AssetBundleLoader
                 if (transform.TryGetComponent<Light>(out Light light))
                 {
                     PrefabObjects.Add(CreateLight(transform,
-                        transform.position,
-                        transform.eulerAngles,
-                        transform.localScale,
                         light.color,
                         light.intensity,
                         light.range,
                         light.shadows != LightShadows.None).gameObject);
+                }
+
+                if (transform.TryGetComponent<ShottingTargetSpawnPoint>(out ShottingTargetSpawnPoint shtarget))
+                {
+                    var target = UnityEngine.Object.Instantiate(shtarget.TargetType == Components.Enums.ShottingTargetType.Binary ?
+                        AssetBundleManager.BinaryShootingTarget : shtarget.TargetType == Components.Enums.ShottingTargetType.DBoy ?
+                        AssetBundleManager.DboyShootingTarget :
+                        AssetBundleManager.SportShootingTarget, transform.position, transform.rotation);
+
+                    var shootingTarget = target.GetComponent<AdminToys.ShootingTarget>();
+                    target.transform.localScale = transform.localScale;
+
+                    var cs = new ConstraintSource()
+                    {
+                        sourceTransform = transform,
+                        weight = 1f,
+                    };
+
+                    var pc = target.gameObject.AddComponent<PositionConstraint>();
+                    pc.constraintActive = true;
+                    pc.AddSource(cs);
+
+                    var rc = target.gameObject.AddComponent<RotationConstraint>();
+                    rc.constraintActive = true;
+                    rc.AddSource(cs);
+
+                    var sc = target.gameObject.AddComponent<ScaleConstraint>();
+                    sc.constraintActive = true;
+                    sc.AddSource(cs);
+
+                    shootingTarget.NetworkScale = target.transform.localScale;
+                    shootingTarget.NetworkPosition = target.transform.position;
+                    shootingTarget.NetworkRotation = new LowPrecisionQuaternion(target.transform.rotation);
+
+                    shootingTarget.NetworkMovementSmoothing = 60;
+
+                    NetworkServer.Spawn(shootingTarget.gameObject);
+                    PrefabObjects.Add(target);
+                }
+
+                if (transform.TryGetComponent<DoorSpawnPoint>(out DoorSpawnPoint door))
+                {
+                    var door2 = UnityEngine.Object.Instantiate(door.DoorType == Components.Enums.DoorType.HCZ ? AssetBundleManager.HCZDoor
+                         : door.DoorType == Components.Enums.DoorType.LCZ ? AssetBundleManager.LCZDoor : AssetBundleManager.EZDoor, transform.position, transform.rotation);
+                    door2.transform.localScale = transform.localScale;
+
+                    var cs = new ConstraintSource()
+                    {
+                        sourceTransform = transform,
+                        weight = 1f,
+                    };
+
+                    var pc = door2.gameObject.AddComponent<PositionConstraint>();
+                    pc.constraintActive = true;
+                    pc.AddSource(cs);
+
+                    var rc = door2.gameObject.AddComponent<RotationConstraint>();
+                    rc.constraintActive = true;
+                    rc.AddSource(cs);
+
+                    var sc = door2.gameObject.AddComponent<ScaleConstraint>();
+                    sc.constraintActive = true;
+                    sc.AddSource(cs);
+
+                    if (door2.TryGetComponent<BreakableDoor>(out BreakableDoor breakableDoor))
+                    {
+                        breakableDoor.NetworkTargetState = door.IsOpen;
+                        breakableDoor.Network_destroyed = door.IsDestroyed;
+                        breakableDoor.RequiredPermissions.RequireAll = door.RequireAllPermissions;
+                        breakableDoor.RequiredPermissions.RequiredPermissions = (Interactables.Interobjects.DoorUtils.KeycardPermissions)(ushort)door.RequiredPermissions;
+                        breakableDoor._ignoredDamageSources = (Interactables.Interobjects.DoorUtils.DoorDamageType)(byte)door.IgnoredDamageSources;
+                        if (door.CurrentLock != Components.Enums.DoorLockReason.None)
+                        {
+                            breakableDoor.ServerChangeLock((Interactables.Interobjects.DoorUtils.DoorLockReason)(ushort)door.CurrentLock, true);
+                        }
+                        NetworkServer.Spawn(door2);
+                        PrefabObjects.Add(door2);
+                    }
                 }
 
                 if (!transform.TryGetComponent<MeshFilter>(out MeshFilter filter))
@@ -89,9 +167,6 @@ namespace AssetBundleLoader
                 PrefabObjects.Add(CreatePrimitive(
                     transform,
                     type,
-                    transform.position,
-                    transform.eulerAngles,
-                    transform.localScale,
                     renderer.material.color).gameObject);
             }
             return true;
@@ -135,35 +210,79 @@ namespace AssetBundleLoader
             }
         }
 
-        public static PrimitiveObjectToy CreatePrimitive(Transform parent, PrimitiveType type, Vector3 pos, Vector3 rot, Vector3 size, Color color)
+        public static PrimitiveObjectToy CreatePrimitive(Transform parent, PrimitiveType type, Color color)
         {
-            AdminToyBase toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent);
-            PrimitiveObjectToy ptoy = toy.GetComponent<PrimitiveObjectToy>();
-            ptoy.NetworkPrimitiveType = type;
-            ptoy.NetworkMaterialColor = color;
-            ptoy.transform.position = pos;
-            ptoy.transform.rotation = Quaternion.Euler(rot);
-            ptoy.transform.localScale = size;
-            ptoy.NetworkScale = ptoy.transform.localScale;
+            PrimitiveObjectToy toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent.transform.position, parent.transform.rotation);
+            toy.transform.localScale = parent.localScale;
+
+            var cs = new ConstraintSource()
+            {
+                sourceTransform = parent,
+                weight = 1f,
+            };
+
+            var pc = toy.gameObject.AddComponent<PositionConstraint>();
+            pc.constraintActive = true;
+            pc.AddSource(cs);
+
+            var rc = toy.gameObject.AddComponent<RotationConstraint>();
+            rc.constraintActive = true;
+            rc.AddSource(cs);
+
+            var sc = toy.gameObject.AddComponent<ScaleConstraint>();
+            sc.constraintActive = true;
+            sc.AddSource(cs);
+
+            toy.NetworkScale = toy.transform.localScale;
+            toy.NetworkPosition = toy.transform.position;
+            toy.NetworkRotation = new LowPrecisionQuaternion(toy.transform.rotation);
+
+            toy.NetworkPrimitiveType = type;
+            toy.NetworkMaterialColor = color;
+
+            toy.NetworkMovementSmoothing = 60;
+                
             NetworkServer.Spawn(toy.gameObject);
-            return ptoy;
+            return toy;
         }
 
 
-        public static LightSourceToy CreateLight(Transform parent, Vector3 pos, Vector3 rot, Vector3 size, Color color, float intensity, float range, bool shadows)
+        public static LightSourceToy CreateLight(Transform parent, Color color, float intensity, float range, bool shadows)
         {
-            AdminToyBase toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent);
-            LightSourceToy ptoy = toy.GetComponent<LightSourceToy>();
-            ptoy.NetworkLightColor = color;
-            ptoy.NetworkLightIntensity = intensity;
-            ptoy.NetworkLightRange = range;
-            ptoy.NetworkLightShadows = shadows;
-            ptoy.transform.position = pos;
-            ptoy.transform.rotation = Quaternion.Euler(rot);
-            ptoy.transform.localScale = size;
-            ptoy.NetworkScale = ptoy.transform.localScale;
+            LightSourceToy toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent.transform.position, parent.transform.rotation);
+            toy.transform.localScale = parent.localScale;
+
+            var cs = new ConstraintSource()
+            {
+                sourceTransform = parent,
+                weight = 1f,
+            };
+
+            var pc = toy.gameObject.AddComponent<PositionConstraint>();
+            pc.constraintActive = true;
+            pc.AddSource(cs);
+
+            var rc = toy.gameObject.AddComponent<RotationConstraint>();
+            rc.constraintActive = true;
+            rc.AddSource(cs);
+
+            var sc = toy.gameObject.AddComponent<ScaleConstraint>();
+            sc.constraintActive = true;
+            sc.AddSource(cs);
+
+            toy.NetworkScale = toy.transform.localScale;
+            toy.NetworkPosition = toy.transform.position;
+            toy.NetworkRotation = new LowPrecisionQuaternion(toy.transform.rotation);
+
+            toy.NetworkLightColor = color;
+            toy.NetworkLightIntensity = intensity;
+            toy.NetworkLightRange = range;
+            toy.NetworkLightShadows = shadows;
+
+            toy.NetworkMovementSmoothing = 60;
+
             NetworkServer.Spawn(toy.gameObject);
-            return ptoy;
+            return toy;
         }
 
         public void Unload()

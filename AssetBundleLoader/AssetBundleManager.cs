@@ -1,5 +1,8 @@
-﻿using Exiled.API.Features;
+﻿using AssetBundleLoader.Patches;
+using Exiled.API.Features;
+using MapGeneration;
 using MEC;
+using Mirror.LiteNetLib4Mirror;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -22,6 +25,8 @@ namespace AssetBundleLoader
 
         public static CoroutineHandle handler;
 
+        public static GameObject LCZDoor, HCZDoor, EZDoor, SportShootingTarget, DboyShootingTarget, BinaryShootingTarget;
+
         public static void Init()
         {
             handler = Timing.RunCoroutine(WatchChanges());
@@ -29,6 +34,20 @@ namespace AssetBundleLoader
             Watcher.EnableRaisingEvents = true;
             Watcher.Deleted += Watcher_Deleted;
             Watcher.Changed += Watcher_Changed;
+            Exiled.Events.Handlers.Map.Generated += Map_Generated;
+        }
+
+        private static void Map_Generated()
+        {
+            SyncMovementPatch.Cache.Clear();
+
+            DoorSpawnpoint[] doorList = UnityEngine.Object.FindObjectsOfType<DoorSpawnpoint>();
+            LCZDoor = doorList.First(x => x.TargetPrefab.name.ToUpper().Contains("LCZ BREAKABLEDOOR")).TargetPrefab.gameObject;
+            HCZDoor = doorList.First(x => x.TargetPrefab.name.ToUpper().Contains("HCZ BREAKABLEDOOR")).TargetPrefab.gameObject;
+            EZDoor = doorList.First(x => x.TargetPrefab.name.ToUpper().Contains("EZ BREAKABLEDOOR")).TargetPrefab.gameObject;
+            SportShootingTarget = LiteNetLib4MirrorNetworkManager.singleton.spawnPrefabs.Find(x => x.name == "sportTargetPrefab");
+            DboyShootingTarget = LiteNetLib4MirrorNetworkManager.singleton.spawnPrefabs.Find(x => x.name == "dboyTargetPrefab");
+            BinaryShootingTarget = LiteNetLib4MirrorNetworkManager.singleton.spawnPrefabs.Find(x => x.name == "binaryTargetPrefab");
         }
 
         public static IEnumerator<float> WatchChanges()
@@ -47,7 +66,7 @@ namespace AssetBundleLoader
                 }
                 catch (Exception) { }
 
-                yield return Timing.WaitForSeconds(0.1f);
+                yield return Timing.WaitForSeconds(5f);
             }
         }
 
@@ -63,8 +82,6 @@ namespace AssetBundleLoader
             {
                 assetBundleInfo.Unload();
             }
-
-            Log.Info(file);
 
             var bundle = AssetBundle.LoadFromFile(file);
             if (bundle == null)
@@ -86,12 +103,14 @@ namespace AssetBundleLoader
 
         private static void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
-            BundlesToReload.Enqueue(e.FullPath);
+            if (!BundlesToReload.Contains(e.FullPath))
+                BundlesToReload.Enqueue(e.FullPath);
         }
 
         private static void Watcher_Deleted(object sender, FileSystemEventArgs e)
         {
-            BundlesToUnload.Enqueue(e.FullPath);
+            if (!BundlesToUnload.Contains(e.FullPath))
+                BundlesToUnload.Enqueue(e.FullPath);
         }
     }
 }

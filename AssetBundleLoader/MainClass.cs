@@ -15,8 +15,15 @@ namespace AssetBundleLoader
 
         public static string PluginPath;
 
+        public static HarmonyLib.Harmony harm;
+
+        public static MainClass instance;
+
         public override void OnEnabled()
         {
+            instance = this;
+            harm = new HarmonyLib.Harmony($"abl.{DateTime.Now.Ticks}");
+            //harm.PatchAll();
             PluginPath = Path.Combine(Paths.Plugins, "AssetBundleLoader");
 
             if (!Directory.Exists(PluginPath))
@@ -27,6 +34,13 @@ namespace AssetBundleLoader
 
             AssetBundleManager.Init();
             base.OnEnabled();
+        }
+
+        public override void OnDisabled()
+        {
+            harm.UnpatchAll(harm.Id);
+            harm = null;
+            base.OnDisabled();
         }
     }
 }
