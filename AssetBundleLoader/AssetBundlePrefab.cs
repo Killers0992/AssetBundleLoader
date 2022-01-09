@@ -45,6 +45,12 @@ namespace AssetBundleLoader
 
             foreach (var transform in PrefabObject.GetComponentsInChildren<Transform>())
             {
+                if (transform.TryGetComponent<Collider>(out Collider col))
+                {
+                    UnityEngine.Object.Destroy(col);
+                }
+
+
                 if (transform.TryGetComponent<Light>(out Light light))
                 {
                     PrefabObjects.Add(CreateLight(transform,
@@ -176,7 +182,22 @@ namespace AssetBundleLoader
 
         public static PrimitiveObjectToy CreatePrimitive(Transform parent, PrimitiveType type, Color color)
         {
-            PrimitiveObjectToy toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent.transform.position, parent.transform.rotation, parent);
+            PrimitiveObjectToy toy = null;
+            if (parent.name.Contains("IGN"))
+            {
+                toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent.transform.position, parent.transform.rotation);
+            }
+            else
+            {
+                toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent.transform.position, parent.transform.rotation);
+                var con = toy.gameObject.AddComponent<ParentConstraint>();
+                con.AddSource(new ConstraintSource()
+                {
+                    sourceTransform = parent,
+                    weight = 1f,
+                });
+                con.constraintActive = true;
+            }
             toy.transform.localScale = parent.localScale;
 
 
@@ -196,7 +217,24 @@ namespace AssetBundleLoader
 
         public static LightSourceToy CreateLight(Transform parent, Color color, float intensity, float range, bool shadows)
         {
-            LightSourceToy toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent.transform.position, parent.transform.rotation, parent);
+            LightSourceToy toy = null;
+
+            if (parent.name.Contains("IGN"))
+            {
+                toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent.transform.position, parent.transform.rotation);
+            }
+            else
+            {
+                toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent.transform.position, parent.transform.rotation);
+
+                var con = toy.gameObject.AddComponent<ParentConstraint>();
+                con.AddSource(new ConstraintSource()
+                {
+                    sourceTransform = parent,
+                    weight = 1f,
+                });
+                con.constraintActive = true;
+            }
             toy.transform.localScale = parent.localScale;
 
             toy.NetworkScale = toy.transform.localScale;
