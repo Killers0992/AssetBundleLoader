@@ -1,8 +1,10 @@
-﻿using AssetBundleLoader.Patches;
-using Exiled.API.Features;
-using MapGeneration;
+﻿using MapGeneration;
 using MEC;
 using Mirror.LiteNetLib4Mirror;
+using PluginAPI.Core;
+using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
+using PluginAPI.Events;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -27,20 +29,25 @@ namespace AssetBundleLoader
 
         public static GameObject LCZDoor, HCZDoor, EZDoor, SportShootingTarget, DboyShootingTarget, BinaryShootingTarget;
 
-        public static void Init()
+        public void Init()
         {
             handler = Timing.RunCoroutine(WatchChanges());
-            Watcher = new FileSystemWatcher(Path.Combine(MainClass.PluginPath, "bundles"));
+
+            string bundlesPath = Path.Combine(MainClass.Handler.PluginDirectoryPath, "bundles");
+
+            if (!Directory.Exists(bundlesPath))
+                Directory.CreateDirectory(bundlesPath);
+
+            Watcher = new FileSystemWatcher(bundlesPath);
             Watcher.EnableRaisingEvents = true;
             Watcher.Deleted += Watcher_Deleted;
             Watcher.Changed += Watcher_Changed;
-            Exiled.Events.Handlers.Map.Generated += Map_Generated;
+            EventManager.RegisterEvents(MainClass.Plugin, this);
         }
 
-        private static void Map_Generated()
+        [PluginEvent]
+        void MapGenerated(MapGeneratedEvent ev)
         {
-            SyncMovementPatch.Cache.Clear();
-
             DoorSpawnpoint[] doorList = UnityEngine.Object.FindObjectsOfType<DoorSpawnpoint>();
             LCZDoor = doorList.First(x => x.TargetPrefab.name.ToUpper().Contains("LCZ BREAKABLEDOOR")).TargetPrefab.gameObject;
             HCZDoor = doorList.First(x => x.TargetPrefab.name.ToUpper().Contains("HCZ BREAKABLEDOOR")).TargetPrefab.gameObject;

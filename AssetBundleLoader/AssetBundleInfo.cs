@@ -1,4 +1,4 @@
-﻿using Exiled.API.Features;
+﻿using PluginAPI.Core;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -43,7 +43,7 @@ namespace AssetBundleLoader
 
         public void Reload()
         {
-            foreach(var prefab in CreatedPrefabs)
+            foreach (var prefab in CreatedPrefabs)
             {
                 prefab.Value.Cache();
                 prefab.Value.Unload();

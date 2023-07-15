@@ -1,13 +1,11 @@
 ﻿using AdminToys;
 using AssetBundleLoader.Components;
-using Exiled.API.Features;
+using AssetBundleLoader.Components.Enums;
 using Interactables.Interobjects;
+using Interactables.Interobjects.DoorUtils;
 using Mirror;
-using System;
+using PluginAPI.Core;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Animations;
 
@@ -69,7 +67,7 @@ namespace AssetBundleLoader
 
                     var shootingTarget = target.GetComponent<AdminToys.ShootingTarget>();
                     target.transform.localScale = transform.localScale;
-                                                  
+
                     shootingTarget.NetworkScale = target.transform.localScale;
                     shootingTarget.NetworkPosition = target.transform.position;
                     shootingTarget.NetworkRotation = new LowPrecisionQuaternion(target.transform.rotation);
@@ -83,7 +81,7 @@ namespace AssetBundleLoader
                 if (transform.TryGetComponent<DoorSpawnPoint>(out DoorSpawnPoint door))
                 {
                     var door2 = UnityEngine.Object.Instantiate(door.DoorType == Components.Enums.DoorType.HCZ ? AssetBundleManager.HCZDoor
-                         : door.DoorType == Components.Enums.DoorType.LCZ ? AssetBundleManager.LCZDoor : AssetBundleManager.EZDoor, transform.position, transform.rotation);
+                         : door.DoorType == DoorType.LCZ ? AssetBundleManager.LCZDoor : AssetBundleManager.EZDoor, transform.position, transform.rotation);
                     door2.transform.localScale = transform.localScale;
 
                     if (door2.TryGetComponent<BreakableDoor>(out BreakableDoor breakableDoor))
@@ -209,7 +207,7 @@ namespace AssetBundleLoader
             toy.NetworkMaterialColor = color;
 
             toy.NetworkMovementSmoothing = 60;
-                
+
             NetworkServer.Spawn(toy.gameObject);
             return toy;
         }
@@ -257,7 +255,7 @@ namespace AssetBundleLoader
             if (PrefabObject != null)
                 UnityEngine.Object.Destroy(PrefabObject);
 
-            foreach(var created in PrefabObjects)
+            foreach (var created in PrefabObjects)
             {
                 UnityEngine.Object.Destroy(created);
             }
