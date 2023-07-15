@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5D914F85-B6B2-4CE4-9BC9-026DF3222C04}</ProjectGuid>
+    <ProjectGuid>{B5BE2216-1318-4346-99AE-8E38EE7EC848}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AssetBundleLoader</RootNamespace>
