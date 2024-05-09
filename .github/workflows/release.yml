@@ -14,12 +14,10 @@ jobs:
     permissions:
       contents: write
     env:
-      releasePath: "${{ github.workspace }}/main/AssetBundleLoader"
+      releasePath: "${{ github.workspace }}/releaseInfo.json"
     steps:
     - name: Checkout main repository.
       uses: actions/checkout@v4
-      with:
-        path: main
     - name: Download depot downloader
       shell: pwsh
       run: |
@@ -37,12 +35,12 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Publish
-      run: dotnet publish ${{ github.workspace }}/main/AssetBundleLoader/AssetBundleLoader/AssetBundleLoader.csproj --configuration Release --self-contained --runtime win-x64
+      run: dotnet build --configuration Release
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
         name: AssetBundleLoader
-        path: ${{ github.workspace }}/main/AssetBundleLoader/AssetBundleLoader/bin/Release/net7/win-x64/publish
+        path: ${{ github.workspace }}/bin/Release/net48/AssetBundleLoader.dll
     - name: Get Release Info
       id: release-info
       uses: zoexx/github-action-json-file-properties@b9f36ce6ee6fe2680cd3c32b2c62e22eade7e590
@@ -62,6 +60,6 @@ jobs:
       uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
       with:
         files: |
-          ${{ github.workspace }}/main/AssetBundleLoader/AssetBundleLoader/bin/Release/net48/win-x64/publish/AssetBundleLoader.dll
+          ${{ github.workspace }}/bin/Release/net48/AssetBundleLoader.dll
           ${{ env.releasePath }}/releaseInfo.json
         tag_name: ${{ env.version }}
