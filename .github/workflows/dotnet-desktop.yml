@@ -15,3 +15,5 @@ jobs:
     steps:
     - name: Build listing
       uses: killers0992/scpsl.pluginlisting@master
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
