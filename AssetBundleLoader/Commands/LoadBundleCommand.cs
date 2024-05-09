@@ -1,13 +1,7 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
-using Exiled.Permissions.Extensions;
+using PluginAPI.Core;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace AssetBundleLoader.Commands
 {
@@ -24,11 +18,11 @@ namespace AssetBundleLoader.Commands
         {
             var player = Player.Get(sender);
 
-            if (!player.CheckPermission("loadbundles"))
+            /*if (!player.CheckPermission("loadbundles"))
             {
                 response = "Missing permission";
                 return false;
-            }
+            }*/
 
             if (arguments.Count < 2)
             {
@@ -39,7 +33,7 @@ namespace AssetBundleLoader.Commands
             var bundleName = arguments.At(0);
             var uniqueName = arguments.At(1);
 
-            var file = Path.Combine(MainClass.PluginPath, "bundles", bundleName);
+            var file = "";// Path.Combine(MainClass.PluginPath, "bundles", bundleName);
 
             var bundle = AssetBundleManager.LoadBundle(file, uniqueName);
             if (bundle != null)

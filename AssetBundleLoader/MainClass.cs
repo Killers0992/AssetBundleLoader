@@ -1,5 +1,6 @@
 ﻿using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
 
 namespace AssetBundleLoader
 {
@@ -10,6 +11,7 @@ namespace AssetBundleLoader
         
         public static AssetBundleManager Manager { get; private set; }
 
+        [PluginPriority(LoadPriority.Highest)]
         [PluginEntryPoint("AssetBundleLoader", "1.0.0", "Plugin for loading asset bundles.", "Killers0992")]
         public void Entry()
         {

@@ -1,13 +1,9 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
-using Exiled.Permissions.Extensions;
+using PluginAPI.Core;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AssetBundleLoader.Commands
 {
@@ -24,11 +20,11 @@ namespace AssetBundleLoader.Commands
         {
             var player = Player.Get(sender);
 
-            if (!player.CheckPermission("loadbundles"))
+            /*if (!player.CheckPermission("loadbundles"))
             {
                 response = "Missing permission";
                 return false;
-            }
+            }*/
 
             if (arguments.Count < 2)
             {
@@ -43,8 +39,8 @@ namespace AssetBundleLoader.Commands
             {
                 using(var web = new WebClient())
                 {
-                    web.DownloadFile(url, Path.Combine(Paths.Exiled, "tempbundle"));
-                    File.Copy(Path.Combine(Paths.Exiled, "tempbundle"), bundle.FileName, true);
+                    //web.DownloadFile(url, Path.Combine(Paths.Exiled, "tempbundle"));
+                    //File.Copy(Path.Combine(Paths.Exiled, "tempbundle"), bundle.FileName, true);
                 }
                 response = $"Updated bundle \"{bundleName}\" with \"{url}\".";
                 return true;

@@ -2,12 +2,10 @@
 using AssetBundleLoader.Components;
 using AssetBundleLoader.Components.Enums;
 using Interactables.Interobjects;
-using Interactables.Interobjects.DoorUtils;
 using Mirror;
 using PluginAPI.Core;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Animations;
 
 namespace AssetBundleLoader
 {
@@ -47,7 +45,6 @@ namespace AssetBundleLoader
                 {
                     UnityEngine.Object.Destroy(col);
                 }
-
 
                 if (transform.TryGetComponent<Light>(out Light light))
                 {
@@ -90,7 +87,7 @@ namespace AssetBundleLoader
                         breakableDoor.Network_destroyed = door.IsDestroyed;
                         breakableDoor.RequiredPermissions.RequireAll = door.RequireAllPermissions;
                         breakableDoor.RequiredPermissions.RequiredPermissions = (Interactables.Interobjects.DoorUtils.KeycardPermissions)(ushort)door.RequiredPermissions;
-                        breakableDoor._ignoredDamageSources = (Interactables.Interobjects.DoorUtils.DoorDamageType)(byte)door.IgnoredDamageSources;
+                        //breakableDoor._ignoredDamageSources = (Interactables.Interobjects.DoorUtils.DoorDamageType)(byte)door.IgnoredDamageSources;
                         if (door.CurrentLock != Components.Enums.DoorLockReason.None)
                         {
                             breakableDoor.ServerChangeLock((Interactables.Interobjects.DoorUtils.DoorLockReason)(ushort)door.CurrentLock, true);
@@ -100,42 +97,13 @@ namespace AssetBundleLoader
                     }
                 }
 
-                if (!transform.TryGetComponent<MeshFilter>(out MeshFilter filter))
-                    continue;
-
-                if (!transform.TryGetComponent<MeshRenderer>(out MeshRenderer renderer))
-                    continue;
-
-                PrimitiveType type = PrimitiveType.Sphere;
-
-                switch (filter.mesh.name)
+                if (transform.TryGetComponent<PrimitiveMetadata>(out PrimitiveMetadata metadata))
                 {
-                    case "Plane Instance":
-                        type = PrimitiveType.Plane;
-                        break;
-                    case "Cylinder Instance":
-                        type = PrimitiveType.Cylinder;
-                        break;
-                    case "Cube Instance":
-                        type = PrimitiveType.Cube;
-                        break;
-                    case "Capsule Instance":
-                        type = PrimitiveType.Capsule;
-                        break;
-                    case "Quad Instance":
-                        type = PrimitiveType.Quad;
-                        break;
-                    case "Sphere Instance":
-                        type = PrimitiveType.Sphere;
-                        break;
-                    default:
-                        continue;
+                    PrefabObjects.Add(CreatePrimitive(
+                        transform,
+                        metadata.Type,
+                        metadata.Color).gameObject);
                 }
-
-                PrefabObjects.Add(CreatePrimitive(
-                    transform,
-                    type,
-                    renderer.material.color).gameObject);
             }
             return true;
         }
@@ -188,13 +156,13 @@ namespace AssetBundleLoader
             else
             {
                 toy = UnityEngine.Object.Instantiate(PrimitiveBaseObject, parent.transform.position, parent.transform.rotation);
-                var con = toy.gameObject.AddComponent<ParentConstraint>();
-                con.AddSource(new ConstraintSource()
-                {
-                    sourceTransform = parent,
-                    weight = 1f,
-                });
-                con.constraintActive = true;
+                //var con = toy.gameObject.AddComponent<ParentConstraint>();
+                //con.AddSource(new ConstraintSource()
+                //{
+                //    sourceTransform = parent,
+                //    weight = 1f,
+                //});
+                //con.constraintActive = true;
             }
             toy.transform.localScale = parent.localScale;
 
@@ -207,6 +175,7 @@ namespace AssetBundleLoader
             toy.NetworkMaterialColor = color;
 
             toy.NetworkMovementSmoothing = 60;
+            toy.IsStatic = true;
 
             NetworkServer.Spawn(toy.gameObject);
             return toy;
@@ -225,13 +194,13 @@ namespace AssetBundleLoader
             {
                 toy = UnityEngine.Object.Instantiate(PrimitiveBaseLight, parent.transform.position, parent.transform.rotation);
 
-                var con = toy.gameObject.AddComponent<ParentConstraint>();
-                con.AddSource(new ConstraintSource()
-                {
-                    sourceTransform = parent,
-                    weight = 1f,
-                });
-                con.constraintActive = true;
+               // var con = toy.gameObject.AddComponent<ParentConstraint>();
+               // con.AddSource(new ConstraintSource()
+               // {
+                //    sourceTransform = parent,
+                //    weight = 1f,
+                //});
+                //con.constraintActive = true;
             }
             toy.transform.localScale = parent.localScale;
 
