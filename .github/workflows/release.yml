@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: write
     env:
-      releasePath: "${{ github.workspace }}/releaseInfo.json"
+      releasePath: "${{ github.workspace }}"
     steps:
     - name: Checkout main repository.
       uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: AssetBundleLoader
-        path: ${{ github.workspace }}/bin/Release/net48/AssetBundleLoader.dll
+        path: ${{ github.workspace }}/AssetBundleLoader/bin/Release/net48/AssetBundleLoader.dll
     - name: Get Release Info
       id: release-info
       uses: zoexx/github-action-json-file-properties@b9f36ce6ee6fe2680cd3c32b2c62e22eade7e590
@@ -60,6 +60,6 @@ jobs:
       uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
       with:
         files: |
-          ${{ github.workspace }}/bin/Release/net48/AssetBundleLoader.dll
+          ${{ github.workspace }}/AssetBundleLoader/bin/Release/net48/AssetBundleLoader.dll
           ${{ env.releasePath }}/releaseInfo.json
         tag_name: ${{ env.version }}
