@@ -1,0 +1,17 @@
+name: Build Listing
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Build listing
+      uses: killers0992/scpsl.pluginlisting@master
