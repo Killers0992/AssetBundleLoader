@@ -34,7 +34,7 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 7.0.x
-    - name: Publish
+    - name: Build
       run: dotnet build --configuration Release
     - name: Upload
       uses: actions/upload-artifact@v3
